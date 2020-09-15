@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 不同Mapper文件的namespace值应该保证唯一 在程序中通过[ namespace + id ]定位到要执行哪一条SQL语句 -->
+<mapper namespace="com.yetk.py.sys.dao.SysUserDao">
+
+
+	<sql id="queryWhereId">
+		from sys_users
+		<where>
+			<if test="username!=null and username!=''">
+				username like concat("%",#{username},"%")
+			</if>
+		</where>
+	</sql>
+
+	<select id="getRowCount" resultType="int">
+		select count(*)
+		<include refid="queryWhereId" />
+	</select>
+
+	<select id="findPageObjects" resultMap="sysUserDeptVo">
+		select *
+		<include refid="queryWhereId" />
+		order by createdTime desc
+		limit #{startIndex},#{pageSize}
+	</select>
+
+	<resultMap type="com.yetk.py.sys.vo.SysUserDeptVo"
+		id="sysUserDeptVo">
+		<association property="sysDept" column="deptId"
+			select="com.yetk.py.sys.dao.SysDeptDao.findById">
+		</association>
+	</resultMap>
+	<update id="validById">
+		update sys_users
+		set valid=#{valid},
+		modifiedUser=#{modifiedUser},
+		modifiedTime=now()
+		where id=#{id}
+	</update>
+
+<insert id="insertObject"
+           parameterType="com.yetk.py.sys.vo.SysUser"
+           useGeneratedKeys="true"
+           keyProperty="id">
+      insert into sys_users
+      (username,password,deptId,email,mobile,salt,valid,
+      createdTime,modifiedTime,createdUser,modifiedUser)
+      values
+    (#{username},#{password},#{deptId},#{email},#{mobile},#{salt},#{valid},
+      now(),now(),#{createdUser},#{modifiedUser})
+   </insert>
+
+ <select id="findObjectById"
+           parameterType="int"
+           resultMap="sysUserDeptVo">
+           select * 
+           from sys_users   
+           where id=#{id}     
+   </select>
+   
+     <update id="updateObject"
+           parameterType="com.yetk.py.sys.vo.SysUser">
+        update sys_users
+        set username=#{username},
+            mobile=#{mobile},
+            email=#{email},
+            deptId=#{deptId},
+            modifiedTime=now(),
+            modifiedUser=#{modifiedUser}
+         where id=#{id}
+   </update>
+   
+</mapper>

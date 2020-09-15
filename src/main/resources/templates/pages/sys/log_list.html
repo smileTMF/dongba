@@ -1,0 +1,135 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">日志管理</h3>
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="用户名">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+                                <i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-default btn-delete">删除</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+						    <th><input type="checkbox" id="checkAll">全选</th>
+							<th>用户名</th>
+							<th>操作</th>
+							<th>请求方法</th>
+							<th>请求参数</th>
+							<th>IP</th>
+							<th>执行时长</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId">
+					    <tr>
+					       <td colspan="7">数据正在加载中...</td>
+					    </tr>
+					</tbody>
+				</table>
+			</div>
+			<div id="pageId" class="box-footer clearfix" dm="100">
+			  
+			</div>
+			<!-- /.box-body -->
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+
+function setContent(id,result){
+	var content=$("#"+id);
+	if(result.state==1){
+		content.empty();
+		for(var item in result.data.records){
+			var tempH=`<tr>
+			<td><input type="checkbox" class="cBox" name="cItem" value="${result.data.records[item].id}" ></td>
+			<td>${result.data.records[item].username}</td>
+			<td>${result.data.records[item].operation}</td>
+			<td>${result.data.records[item].method}</td>
+			<td>${result.data.records[item].params}</td>
+			<td>${result.data.records[item].ip}</td>
+			<td>${result.data.records[item].time}</td>
+			</tr>`;
+		content.append(tempH);
+		}
+		setPage("/log/doFindPageObjects",result);
+		console.log($(".cBox").length);
+		$(".cBox").bind('click', ()=>{
+			let flag = true;
+			for(var sonBox of $(".cBox")){
+				if($(sonBox).prop("checked")==false){
+					flag = false;
+				}
+			}
+			$("#checkAll").prop("checked",flag);
+		});
+	}else{
+		content.empty();
+		content.append(result.data);
+	}
+}
+	getContent("tbodyId","/log/doFindPageObjects",{"pageCurrent":1}, $("#pageId").load("/doPageUI"));
+	$("#checkAll").bind('click', ()=>{
+		let flag = $("#checkAll").prop("checked");
+		for(var sonBox of $(".cBox")){
+			$(sonBox).prop("checked",flag);
+		}
+	})
+	
+    function doLoadUI(id,url){
+  	  //var dom=document.getElementById(id);
+  	  //dom.onclick=function(){
+  		//  $("#mainContentId").load(url); 
+  	  //}
+  	  $("#"+id).click(()=>{//事件处理函数
+  		  console.log("====");
+  		  //load函数为一个jquery中的ajax函数,其作用是将url对应的资源，异步加载到指定位置
+  		  //此处表示在mainContentId对应的对象位置异步加载url指定资源
+  		  $("#mainContentId").load(url); 
+  	  }) 
+    }
+    
+	$(".btn-search").bind('click', ()=>{
+		let username = $("#searchNameId").val();
+		$(".btn-search").data("username",username);
+		console.log(username);
+		//这个参数要保存在js中，方法未知
+		getContent("tbodyId","/log/doFindPageObjects",{"pageCurrent":1,"username":username}, $("#pageId").load("/doPageUI"));
+	})
+	
+	$(".btn-delete").bind('click', ()=>{
+		let ids = new Array();
+		for(let i = 0 ; i < $(".cBox").length ; i ++ ){         
+			if($( $(".cBox")[i]).prop("checked")==true){
+				console.log($( $(".cBox")[i]).prop("value"));
+				ids[i] = $( $(".cBox")[i]).prop("value");
+			}
+		}
+		console.log(ids.join(","));
+		//ajax
+		$.getJSON("/log/doDeleteObjects",{"ids":ids.join(",")},(result)=>{
+				console.log(result);
+				window.alert(result.data);
+		});
+		let username =  $(".btn-search").data("username");
+		getContent("tbodyId","/log/doFindPageObjects",{"pageCurrent":1,"username":username}, $("#pageId").load("/doPageUI"));
+	})
+</script>
+
+
+
+
+
+

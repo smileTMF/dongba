@@ -1,0 +1,133 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">角色管理</h3>
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="角色名">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+								<i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-default btn-add">添加</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<form>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>序号</th>
+								<th>角色名称</th>
+								<th>备注</th>
+								<th>创建时间</th>
+								<th>修改时间</th>
+								<th>创建用户</th>
+								<th>修改用户</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+						<tbody id="tbodyId">
+						</tbody>
+					</table>
+				</form>
+			</div>
+			<!-- /.box-body -->
+			<div id="pageId" class="box-footer clearfix"></div>
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+getContent("tbodyId","role/doFindPageObjects",{"pageCurrent":1}, $("#pageId").load("/doPageUI"));
+function setContent(id,result){
+	var content=$("#"+id);
+	if(result.state==1){
+		content.empty();
+		for(var item = 0 ; item < result.data.records.length ; item ++){
+			let parentTR=$("<tr></tr>");
+			$("#mainContentId").off("click",`.btn-delete${result.data.records[item].id}`);
+			$("#mainContentId").off("click",`.btn-update${result.data.records[item].id}`);
+			var tempH=`
+			<td> ${item + 1 }</td>
+			<td>${result.data.records[item].name}</td>
+			<td>${result.data.records[item].note}</td>
+			<td>${result.data.records[item].createdTime}</td>
+			<td>${result.data.records[item].modifiedTime}</td>
+			<td>${result.data.records[item].createdUser}</td>
+			<td>${result.data.records[item].modifiedUser}</td>
+			<td><a class='btn-delete${result.data.records[item].id}'>delete</a>
+			&nbsp;<a class='btn-update${result.data.records[item].id}'>update</a></td>
+			`;
+			parentTR.append(tempH);
+			parentTR.data("id",result.data.records[item].id);
+			content.append(parentTR);
+		$("#mainContentId").on("click",`.btn-delete${result.data.records[item].id}`,doDeleteObject);
+		$("#mainContentId").on("click",`.btn-update${result.data.records[item].id}`,doUpdateObject);
+		}
+		setPage("/role/doFindPageObjects",result);
+	}else{
+		content.empty();
+		content.append(result.data);
+	}
+}
+$(".input-group-btn").on("click",".btn-search",()=>{
+	let username = $("#searchNameId").val();
+	$(".btn-search").data("username",username);
+	console.log("username:"+username);
+	//这个参数要保存在js中，方法未知
+	getContent("tbodyId","/role/doFindPageObjects",{"pageCurrent":1,"username":username}, $("#pageId").load("/doPageUI"));
+});
+$(".input-group-btn").on("click",".btn-add",()=>{
+	 $("#mainContentId").load("/role/role_edit"); 
+});
+function doDeleteObject(){
+	   //1.获取选中的值(分页显示记录时在tr上要绑定id的值)
+	   var id=$(this).parents("tr").data("id");
+	   //2.构建参数对象
+	   var params={id:id};
+	   //3.异步请求执行删除
+	   var url="/role/doDeleteObject";
+	   $.post(url,params,function(result){
+		   if(result.state==1){
+			   alert(result.message);
+			   getContent("tbodyId","/role/doFindPageObjects",{"pageCurrent":1}, $("#pageId").load("/doPageUI"));
+		   }else{
+			   alert(result.message);
+		   }
+	   })
+}
+
+$("#mainContentId").on("click",".btn-update",()=>{
+	 $("#mainContentId").load("/role/role_edit"); 
+});
+function loadPageUI(title){
+	   $("#mainContentId")
+		  .load("role/role_edit",function(){
+			  $(".box-title").html(title);
+	   }); 
+}
+function doUpdateObject(){
+	title="修改角色";
+	//获取当前行的id值
+	 var id=$(this).parents("tr").data("id");
+	//根据id查找记录，判定记录是否存在
+	var url="role/doFindObjectById";
+	var data={"id":id};
+	$.getJSON(url,data,function(result){
+		if(result.state==1){
+		$("#mainContentId").data("data",result.data)
+		loadPageUI(title);
+		}else{
+		 alert(result.message);
+		}
+	});
+}
+
+</script>
