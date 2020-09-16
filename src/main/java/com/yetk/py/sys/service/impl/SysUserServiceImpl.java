@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.yetk.py.sys.common.annotation.RequiredCache;
 import com.yetk.py.sys.common.bo.PageObject;
 import com.yetk.py.sys.common.exception.ServiceException;
 import com.yetk.py.sys.dao.SysUserDao;
@@ -31,6 +32,7 @@ public class SysUserServiceImpl implements SysUserService{
 	private SysUserRoleDao sysUserRoleDao;
 
 	@Override
+	@RequiredCache
 	public PageObject<SysUserDeptVo> findPageObjects(
 			String username,Integer pageCurrent) {
 		//1.对参数进行校验

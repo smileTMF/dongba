@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.yetk.py.sys.common.annotation.ClearCache;
+import com.yetk.py.sys.common.annotation.RequiredCache;
 import com.yetk.py.sys.common.exception.ServiceException;
 import com.yetk.py.sys.dao.SysDeptDao;
 import com.yetk.py.sys.service.SysDeptService;
@@ -19,6 +21,7 @@ public class SysDeptServiceImpl implements SysDeptService {
 	@Autowired
 	private SysDeptDao sysDeptDao;
 	@Override
+	@RequiredCache
 	public List<Map<String, Object>> findObjects() {
 		List<Map<String, Object>> list=
 		sysDeptDao.findObjects();
@@ -35,6 +38,7 @@ public class SysDeptServiceImpl implements SysDeptService {
 		return list;
 	}
 	@Override
+	@ClearCache
 	public int updateObject(SysDept entity) {
 		//1.合法验证
 		if(entity==null)

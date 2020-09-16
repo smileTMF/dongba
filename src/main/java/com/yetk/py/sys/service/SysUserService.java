@@ -7,7 +7,7 @@ import com.yetk.py.sys.vo.SysUser;
 import com.yetk.py.sys.vo.SysUserDeptVo;
 
 public interface SysUserService {
-
+	
 	PageObject<SysUserDeptVo> findPageObjects(String username,Integer pageCurrent);
 	
 	int validById(Integer id,Integer valid);
@@ -17,6 +17,5 @@ public interface SysUserService {
 	Map<String,Object> findObjectById(Integer userId) ;
 	
 	int updateObject(SysUser entity,Integer[] roleIds);
-
 
 }
